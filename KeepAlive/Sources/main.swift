@@ -8,11 +8,9 @@ import swiftlog
 import Glibc
 import Foundation
 
-slogLevel = .Verbose
+slogLevel = .Info // Change to .Verbose to get real chatty
 
-SLogVerbose("Sending test message")
-
-let client = Client(clientId:"temperature") // generate a random string
+let client = Client(clientId:"my-client-id")
 client.host = "broker.hivemq.com"
 client.port = 1883
 client.keepAlive = 10 // Send keepalive heartbeat every n seconds
@@ -22,11 +20,11 @@ guard client.connect() else {
   exit(-1)
 }
 
-let reportTemperature = NSTimer.scheduledTimer(NSTimeInterval(30), repeats:true){_ in
-  SLogVerbose("Updating temperature")
+let reportInterval    = 30
+let reportTemperature = NSTimer.scheduledTimer(NSTimeInterval(reportInterval), repeats:true){_ in
+  SLogInfo("Updating temperature")
   let _ = client.publish(topic:"/dallas/temperature/value", withString:"100")
 }
+reportTemperature.fire()
 NSRunLoop.currentRunLoop().addTimer(reportTemperature, forMode:NSDefaultRunLoopMode)
 NSRunLoop.currentRunLoop().run()
-
-//select(0, nil, nil, nil, nil)
